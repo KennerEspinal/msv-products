@@ -1,46 +1,60 @@
 package com.patterns.ecommerce.Config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
 @Configuration
 public class DatabaseConfig {
 
-//    Variables for MySQL database
-
-    @Value("${db.engine:mysql}")
+    @Value("${db.engine}")
     private String dbEngine;
 
-    @Value("${MYSQL_USER:root}")
+    @Value("${spring.datasource.mysql.url}")
+    private String mysqlUrl;
+
+    @Value("${spring.datasource.mysql.username}")
     private String mysqlUser;
 
-    @Value("${MYSQL_PASSWORD:root}")
+    @Value("${spring.datasource.mysql.password}")
     private String mysqlPassword;
 
-    @Value("${MYSQL_DATABASE:ecommerce}")
-    private String mysqlDatabase;
+    @Value("${spring.datasource.oracle.url}")
+    private String oracleUrl;
 
-//    Variables for Oracle database
+    @Value("${spring.datasource.oracle.username}")
+    private String oracleUser;
 
-    @Value("${ORACLE_PASSWORD:m1p4ssw0rd}")
+    @Value("${spring.datasource.oracle.password}")
     private String oraclePassword;
 
+    @PostConstruct
+    public void checkDbEngine() {
+        System.out.println("DB Engine: " + dbEngine);
+        System.out.println("MySQL URL: " + mysqlUrl);
+        System.out.println("Oracle URL: " + oracleUrl);
+    }
+
     @Bean
+    @Primary
     public DataSource dataSource() {
         DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
 
         if ("oracle".equalsIgnoreCase(dbEngine)) {
+            System.out.println("Configuring Oracle DataSource");
             dataSourceBuilder.driverClassName("oracle.jdbc.OracleDriver");
-            dataSourceBuilder.url("jdbc:oracle:thin:@localhost:1521/XE");
-            dataSourceBuilder.username("system");
+            dataSourceBuilder.url(oracleUrl);
+            dataSourceBuilder.username(oracleUser);
             dataSourceBuilder.password(oraclePassword);
         } else {
+            System.out.println("Configuring MySQL DataSource");
             dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
-            dataSourceBuilder.url("jdbc:mysql://localhost:3306/" + mysqlDatabase);
+            dataSourceBuilder.url(mysqlUrl);
             dataSourceBuilder.username(mysqlUser);
             dataSourceBuilder.password(mysqlPassword);
         }
